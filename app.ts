@@ -34,6 +34,8 @@ console.log(
 		.format()
 )
 
+// Check if roles are added already in system
+
 //Setting static assests directory
 app.use('/static', express.static(path.join(__dirname, 'public')))
 

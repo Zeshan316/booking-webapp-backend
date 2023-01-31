@@ -25,3 +25,5 @@ declare namespace Express {
 		userRole?: string
 	}
 }
+
+declare type GenericObject = { [key: string]: any }
