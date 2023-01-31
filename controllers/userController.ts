@@ -263,6 +263,20 @@ const deleteUser = async (req: Request, res: Response) => {
 			.delete()
 			.run()
 
+		// delete password
+		await r
+			.table(Password.getTableName())
+			.filter(r.row('userId').eq(userId))
+			.delete()
+			.run()
+
+		// delete userrole
+		await r
+			.table(UserRole.getTableName())
+			.filter(r.row('userId').eq(userId))
+			.delete()
+			.run()
+
 		if (deleted) {
 			res.status(200).json({ message: 'User deleted sucessfully' })
 			return
