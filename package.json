@@ -11,7 +11,9 @@
   "author": "Zeshan",
   "license": "ISC",
   "dependencies": {
+    "@types/chalk": "^2.2.0",
     "bcrypt": "^5.1.0",
+    "chalk": "^4.1.2",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
