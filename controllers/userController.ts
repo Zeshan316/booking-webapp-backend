@@ -9,49 +9,60 @@ import thinky from '../config/db'
 
 const { r } = thinky
 
-/* const forgotPassword = async (req, res) => {
-	const { email } = req?.body
-
-	if (!email) {
-		res.status(400).json({ message: 'Email not found' })
-		return
-	}
-
-	const user = await User.findOne({ email: email })
-	if (!user) {
-		res.status(400).json({ message: 'Invalid email.' })
-		return
-	}
-
-	const hash = uuid.v4()
-
-	sendEmail(
-		email,
-		'forgotpassword',
-		{
-			resetPasswordLink: path.join(
-				process.env.APP_URL,
-				`/api/user/resetpassword/${hash}`
-			),
-		},
-		hash
-	)
-
-	res.status(200).json({ message: 'Check your email address.' })
-}
-*/
-
 const resetPassword = async (req: Request, res: Response) => {
 	res.send('resetPassword endpoint...')
 }
 
-const test = async (req: Request, res: Response) => {
-	res.status(200).json({ message: 'ok' })
-}
-
 // Get all users and apply filters while fetching
 const getUsers = async (req: Request, res: Response) => {
-	res.status(200).json({ message: 'done' })
+	try {
+		const {
+			order = 'desc',
+			from = 0,
+			to = 10,
+			firstName = '',
+			email = '',
+		} = req?.query
+
+		// Count total users
+		const totalUsers = await r
+			.table(User.getTableName())
+			.count()
+			.run()
+
+		// check is there any check to filter on
+		const filterObject = {
+			...(firstName.length && { firstName }),
+			...(email.length && { email }),
+		}
+
+		// check sorting order of data
+		const orderByField =
+			order === 'desc' ? r.desc('createdAt') : r.asc('createdAt')
+
+		const users = await r
+			.table(User.getTableName())
+			.orderBy(orderByField, {
+				index: orderByField,
+			})
+			.eqJoin('id', r.table(UserRole.getTableName()), {
+				index: 'userId',
+			})
+			.zip()
+			.eqJoin('roleId', r.table(Role.getTableName()))
+			.zip()
+			.filter(filterObject)
+			.skip(Number(from))
+			.limit(Number(to))
+			.run()
+
+		res
+			.status(200)
+			.json({ message: 'All users', data: { totalUsers, users } })
+	} catch (error) {
+		console.log(error)
+		res.status(500).json({ message: 'Some error occured' })
+	}
 }
 
 // Get a single user by id
@@ -204,7 +215,12 @@ const _updateUserPassword = async (
 	newPassword: string
 ): Promise<boolean> => {
 	// if user do not want to update password
-	if (!oldPassword.length || !newPassword.length) return true
+	if (
+		!oldPassword.length ||
+		!newPassword.length ||
+		oldPassword === newPassword
+	)
+		return true
 
 	const userPassword = await r
 		.table(Password.getTableName())
@@ -288,4 +304,4 @@ const deleteUser = async (req: Request, res: Response) => {
 	}
 }
 
-export { test, getUsers, getUser, createUser, updateUser, deleteUser }
+export { getUsers, getUser, createUser, updateUser, deleteUser }
