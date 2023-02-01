@@ -10,8 +10,8 @@ export const logger = (
 	console.log(
 		chalk.blue(
 			`[${moment().format('MMMM Do YYYY, h:mm:ss a')}] "${
-				req.method
-			} ${req.hostname} ${req.path}  ${req.protocol}" from ${req.ip}`
+				req.protocol
+			} ${req.method} ${req.hostname} ${req.path}" from ${req.ip}`
 		)
 	)
 
