@@ -9,6 +9,7 @@ import moment from 'moment-timezone'
 import sessionAuthentication from './middleware/session'
 import dotenv from 'dotenv'
 dotenv.config()
+import { logger } from './middleware/logging'
 import thinky from './config/db'
 import { User, Password, UserRole, Role } from './models/All'
 import bcrypt from 'bcrypt'
@@ -20,11 +21,16 @@ import userRoutes from './routes/userRoutes'
 
 // Server to start on
 const port = process.env.DEV_PORT || 5000
+// Setting default timezone
+process.env.TZ = 'Asia/Manila'
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(helmet())
-app.use(morgan('combined'))
+// app.use(morgan('combined'))
+app.use((req, res, next) => {
+	logger(req, res, next)
+})
 app.use(cors())
 
 console.log(

@@ -1,4 +1,4 @@
-import express, { IRouter, Router } from 'express'
+import express, { IRouter } from 'express'
 const authRouter: IRouter = express.Router()
 import { check } from 'express-validator'
 import { login } from '../controllers/authController'
