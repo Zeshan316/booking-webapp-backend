@@ -1,17 +1,14 @@
-import express, { Request, Response } from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 const app = express()
 
 import helmet from 'helmet'
 import cors from 'cors'
 import path, { join } from 'path'
-import moment from 'moment-timezone'
 import sessionAuthentication from './middleware/session'
 import dotenv from 'dotenv'
 dotenv.config()
 import { logger } from './middleware/logging'
 import thinky from './config/db'
-import { User, Password, UserRole, Role } from './models/All'
-import bcrypt from 'bcrypt'
 
 const { r } = thinky
 // Routes
@@ -19,7 +16,7 @@ import authRoutes from './routes/authRoutes'
 import userRoutes from './routes/userRoutes'
 
 // Server to start on
-const port = process.env.DEV_PORT || 5000
+const port = process.env.DEV_PORT || 4000
 // Setting default timezone
 process.env.TZ = 'Asia/Manila'
 
@@ -29,7 +26,7 @@ app.use(helmet())
 app.use(cors())
 
 // Logger middleware
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
 	logger(req, res, next)
 })
 
