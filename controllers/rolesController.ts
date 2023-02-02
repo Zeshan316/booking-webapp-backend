@@ -23,10 +23,11 @@ const getRoles = async (req: Request, res: Response) => {
 			.run()
 
 		// check is there any check to filter on
-		const filterObject = {
-			...(name.length && { name }),
-			...(level.length && { level }),
-		}
+		const filterObject = name.length
+			? r.row('name').match(`(?i)${name}`)
+			: {
+					...(level.length && { level: Number(level) }),
+			  }
 
 		// check sorting order of data
 		const orderByField =
