@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import { User, Password, Role, UserRole } from '../models/All'
 import thinky from '../config/db'
+import path from 'path'
+import { UploadedFile } from 'express-fileupload'
 
 const { r } = thinky
 
@@ -300,4 +302,61 @@ const deleteUser = async (req: Request, res: Response) => {
 	}
 }
 
-export { getUsers, getUser, createUser, updateUser, deleteUser }
+const uploadProfile = async (req: Request, res: Response) => {
+	try {
+		if (!req.files || Object.keys(req.files).length === 0) {
+			return res.status(400).send('No files were uploaded.')
+		}
+
+		const { id: userId } = req?.params
+		if (!userId) {
+			res.status(400).json({ message: 'User id not found.' })
+		}
+
+		const allowedExtensions = ['.png', '.jpg', '.jpeg']
+		const profileImg: any = req.files?.profile
+
+		if (!allowedExtensions.includes(path.extname(profileImg.name))) {
+			res.status(400).json({
+				message: 'Only png, jpg files are allowed to upload.',
+			})
+			return
+		}
+
+		const fileName: string = `${userId}-${profileImg.name}`
+		const uploadPath: string = path.join(
+			path.resolve(__dirname, '..'),
+			`public/images/${fileName}`
+		)
+
+		profileImg.mv(uploadPath, async function (err: any) {
+			if (err) {
+				res.status(400).json({ message: err?.message })
+				return
+			}
+
+			await r
+				.table(User.getTableName())
+				.get(userId)
+				.update({ profileImgUrl: `static/images/${fileName}` })
+				.run()
+
+			res.status(200).json({
+				message: 'File uploaded!',
+				data: { filePath: `static/images/${fileName}` },
+			})
+			return
+		})
+	} catch (error: any) {
+		res.status(500).json({ message: error?.message })
+	}
+}
+
+export {
+	getUsers,
+	getUser,
+	createUser,
+	updateUser,
+	deleteUser,
+	uploadProfile,
+}

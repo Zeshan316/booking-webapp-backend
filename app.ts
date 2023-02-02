@@ -3,10 +3,11 @@ const app = express()
 
 import helmet from 'helmet'
 import cors from 'cors'
-import path, { join } from 'path'
-import sessionAuthentication from './middleware/session'
+import path from 'path'
+import fileUpload from 'express-fileupload'
 import dotenv from 'dotenv'
 dotenv.config()
+import sessionAuthentication from './middleware/session'
 import { logger } from './middleware/logging'
 import thinky from './config/db'
 
@@ -25,6 +26,12 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(helmet())
 app.use(cors())
+app.use(
+	fileUpload({
+		createParentPath: true,
+		limits: { fileSize: 50 * 1024 * 1024 },
+	})
+)
 
 // Logger middleware
 app.use((req: Request, res: Response, next: NextFunction) => {

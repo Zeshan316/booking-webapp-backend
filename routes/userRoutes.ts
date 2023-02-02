@@ -7,11 +7,13 @@ import {
 	createUser,
 	updateUser,
 	deleteUser,
+	uploadProfile,
 } from '../controllers/usersController'
 
 userRouter.get('/', getUsers)
 userRouter.get('/:id', getUser)
 userRouter.post('/', createUser)
+userRouter.post('/uploadAvtar/:id', uploadProfile)
 userRouter.patch('/:id', updateUser)
 userRouter.delete('/:id', deleteUser)
 
