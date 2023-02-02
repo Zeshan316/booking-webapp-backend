@@ -17,7 +17,9 @@ const getUsers = async (req: Request, res: Response) => {
 			from = 0,
 			to = 10,
 			firstName = '',
+			lastName = '',
 			email = '',
+			phoneNumber = '',
 		} = req?.query
 
 		// Count total users
@@ -27,10 +29,14 @@ const getUsers = async (req: Request, res: Response) => {
 			.run()
 
 		// check is there any check to filter on
-		const filterObject = {
-			...(firstName.length && { firstName }),
-			...(email.length && { email }),
-		}
+		let filterObject = {}
+		if (firstName)
+			filterObject = r.row('firstName').match(`(?i)${firstName}`)
+		if (lastName)
+			filterObject = r.row('lastName').match(`(?i)${lastName}`)
+		if (email) filterObject = r.row('email').match(`(?i)${email}`)
+		if (phoneNumber)
+			filterObject = r.row('phoneNumber').match(`(?i)${phoneNumber}`)
 
 		// check sorting order of data
 		const orderByField =
