@@ -460,7 +460,7 @@ declare module 'thinky' {
 		mul(n: number): Expression<number>
 		div(n: number): Expression<number>
 		mod(n: number): Expression<number>
-
+		match(v: any): any
 		hasFields(...fields: string[]): Expression<boolean>
 
 		default(value: T): Expression<T>

@@ -1,10 +1,6 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
 import { User, Password, Role, UserRole } from '../models/All'
-import path from 'path'
-import fs from 'fs'
-import uuid, { v4 } from 'uuid'
 import thinky from '../config/db'
 
 const { r } = thinky
@@ -86,7 +82,7 @@ const getUser = async (req: Request, res: Response) => {
 			return
 		}
 
-		res.status(200).json({ message: 'User not found', data: [] })
+		res.status(200).json({ message: 'User not found' })
 	} catch (error) {
 		console.log(error)
 		res.status(500).json({ message: 'Some error occured' })
@@ -120,9 +116,7 @@ const createUser = async (req: Request, res: Response) => {
 			.run()
 
 		if (alreadyUser.length) {
-			res
-				.status(200)
-				.json({ message: 'User exists already', data: [] })
+			res.status(200).json({ message: 'User exists already' })
 			return
 		}
 
@@ -148,9 +142,7 @@ const createUser = async (req: Request, res: Response) => {
 			roleId: roleId ? roleId : role.length ? role[0]['id'] : '0',
 		}).save()
 
-		res
-			.status(201)
-			.json({ message: 'User created successfully.', data: [] })
+		res.status(201).json({ message: 'User created successfully.' })
 	} catch (error) {
 		res.status(500).json({ message: 'Some error occured' })
 	}
@@ -187,7 +179,6 @@ const updateUser = async (req: Request, res: Response) => {
 		if (!userPasswordUpdation as boolean) {
 			res.status(400).json({
 				message: 'Password not updated',
-				data: [],
 			})
 			return
 		}
@@ -197,12 +188,11 @@ const updateUser = async (req: Request, res: Response) => {
 		if (!userRole) {
 			res.status(400).json({
 				message: 'Role not updated',
-				data: [],
 			})
 			return
 		}
 
-		res.status(200).json({ message: 'User data updated', data: [] })
+		res.status(200).json({ message: 'User data updated' })
 	} catch (error) {
 		res.status(500).json({ message: 'Some error occured' })
 	}

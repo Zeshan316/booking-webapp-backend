@@ -4,9 +4,6 @@ import jwt from 'jsonwebtoken'
 import thinky from '../config/db'
 import { User, Password, Role, UserRole } from '../models/All'
 import { validationResult } from 'express-validator'
-import uuid from 'uuid'
-import path from 'path'
-import fs from 'fs'
 
 const { r } = thinky
 

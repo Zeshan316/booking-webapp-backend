@@ -14,6 +14,7 @@ const { r } = thinky
 // Routes
 import authRoutes from './routes/authRoutes'
 import userRoutes from './routes/userRoutes'
+import roleRoutes from './routes/roleRoutes'
 
 // Server to start on
 const port = process.env.DEV_PORT || 4000
@@ -39,6 +40,7 @@ app.use('/static', express.static(path.join(__dirname, 'public')))
 app.get('/', (req, res) => res.send('Server is running 😊'))
 app.use('/api/auth', authRoutes)
 app.use('/api/users', sessionAuthentication, userRoutes)
+app.use('/api/roles', sessionAuthentication, roleRoutes)
 
 //404 page
 app.use((req, res, next) => {
