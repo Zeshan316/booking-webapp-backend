@@ -1,5 +1,6 @@
 import express, { IRouter } from 'express'
 const userRouter: IRouter = express.Router()
+import { check } from 'express-validator'
 
 import {
 	getUsers,
@@ -12,7 +13,20 @@ import {
 
 userRouter.get('/', getUsers)
 userRouter.get('/:id', getUser)
-userRouter.post('/', createUser)
+userRouter.post(
+	'/',
+	[
+		check('firstName').exists().notEmpty().isLength({ max: 60 }),
+		check('lastName').exists().notEmpty().isLength({ max: 60 }),
+		check('email')
+			.exists()
+			.notEmpty()
+			.isEmail()
+			.isLength({ max: 60 }),
+		check('password').exists().notEmpty().isLength({ max: 60 }),
+	],
+	createUser
+)
 userRouter.post('/uploadAvtar/:id', uploadProfile)
 userRouter.patch('/:id', updateUser)
 userRouter.delete('/:id', deleteUser)

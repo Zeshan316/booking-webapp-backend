@@ -5,11 +5,12 @@ import thinky from '../config/db'
 import path from 'path'
 import { UploadedFile } from 'express-fileupload'
 import chalk from 'chalk'
+import { validationResult } from 'express-validator'
 
 const { r } = thinky
 
 const resetPassword = async (req: Request, res: Response) => {
-	res.send('resetPassword endpoint...')
+	res.status(200).json({ message: 'resetPassword endpoint...' })
 }
 
 // Get all users and apply filters while fetching
@@ -76,6 +77,12 @@ const getUsers = async (req: Request, res: Response) => {
 const getUser = async (req: Request, res: Response) => {
 	try {
 		const { id } = req?.params
+
+		if (!id) {
+			res.status(400).json({ message: 'User id not found' })
+			return
+		}
+
 		const user = await r
 			.table(UserRole.getTableName())
 			.filter(r.row('userId').eq(id))
@@ -112,6 +119,16 @@ const _formatUserData = (data: GenericObject) => {
 // Create a new user, it's password and role
 const createUser = async (req: Request, res: Response) => {
 	try {
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.status(400).json({
+				message: `${errors.array()[0]['msg']} for ${
+					errors.array()[0]['param']
+				}`,
+			})
+			return
+		}
+
 		const {
 			firstName,
 			lastName,
@@ -154,76 +171,6 @@ const createUser = async (req: Request, res: Response) => {
 		}).save()
 
 		res.status(201).json({ message: 'User created successfully.' })
-	} catch (error) {
-		res.status(500).json({ message: 'Some error occured' })
-	}
-}
-
-// Update a user
-const updateUser = async (req: Request, res: Response) => {
-	try {
-		const { id: userId } = req?.params
-
-		const existingUser = await r
-			.table(User.getTableName())
-			.get(userId)
-			.run()
-
-		if (!existingUser) {
-			res.status(400).json({
-				message: 'User not updated',
-			})
-			return
-		}
-
-		const {
-			firstName,
-			lastName,
-			phoneNumber,
-			profileImgUrl = existingUser.profileImgUrl,
-			oldPassword = '',
-			newPassword = '',
-			roleId,
-			isActive = existingUser.isActive,
-		} = req?.body
-
-		// update user data
-		await r
-			.table(User.getTableName())
-			.get(userId)
-			.update({
-				firstName,
-				lastName,
-				phoneNumber,
-				profileImgUrl,
-				isActive,
-			})
-			.run()
-
-		// update user password
-		const userPasswordUpdation: boolean = await _updateUserPassword(
-			userId,
-			oldPassword,
-			newPassword
-		)
-
-		if (!userPasswordUpdation as boolean) {
-			res.status(400).json({
-				message: 'Password not updated',
-			})
-			return
-		}
-
-		// update user role
-		const userRole: boolean = await _updateUserRole(userId, roleId)
-		if (!userRole) {
-			res.status(400).json({
-				message: 'Role not updated',
-			})
-			return
-		}
-
-		res.status(200).json({ message: 'User data updated' })
 	} catch (error) {
 		res.status(500).json({ message: 'Some error occured' })
 	}
@@ -283,10 +230,89 @@ const _updateUserRole = async (
 	return errors ? false : true
 }
 
+// Update a user
+const updateUser = async (req: Request, res: Response) => {
+	try {
+		const { id: userId } = req?.params
+
+		if (!userId) {
+			res.status(400).json({ message: 'User id not found' })
+			return
+		}
+
+		const existingUser = await r
+			.table(User.getTableName())
+			.get(userId)
+			.run()
+
+		if (!existingUser) {
+			res.status(400).json({
+				message: 'User not updated',
+			})
+		}
+
+		const {
+			firstName,
+			lastName,
+			phoneNumber,
+			profileImgUrl = existingUser.profileImgUrl,
+			oldPassword = '',
+			newPassword = '',
+			roleId,
+			isActive = existingUser.isActive,
+		} = req?.body
+
+		// update user data
+		await r
+			.table(User.getTableName())
+			.get(userId)
+			.update({
+				firstName,
+				lastName,
+				phoneNumber,
+				profileImgUrl,
+				isActive,
+			})
+			.run()
+
+		// update user password
+		const userPasswordUpdation: boolean = await _updateUserPassword(
+			userId,
+			oldPassword,
+			newPassword
+		)
+
+		if (!userPasswordUpdation as boolean) {
+			res.status(400).json({
+				message: 'Password not updated',
+			})
+			return
+		}
+
+		// update user role
+		const userRole: boolean = await _updateUserRole(userId, roleId)
+		if (!userRole) {
+			res.status(400).json({
+				message: 'Role not updated',
+			})
+			return
+		}
+
+		res.status(200).json({ message: 'User data updated' })
+	} catch (error) {
+		res.status(500).json({ message: 'Some error occured' })
+	}
+}
+
 // Delete a user
 const deleteUser = async (req: Request, res: Response) => {
 	try {
 		const { id: userId } = req?.params
+		if (!userId) {
+			res.status(400).json({ message: 'User id not found' })
+			return
+		}
+
 		const user = await r.table(User.getTableName()).get(userId).run()
 
 		if (!user) {
