@@ -6,6 +6,7 @@ import {
 	createRole,
 	updateRole,
 	getRoles,
+	deleteRole,
 } from '../controllers/rolesController'
 
 roleRouter.get('/', getRoles)
@@ -22,5 +23,7 @@ roleRouter.patch(
 	[check('name').exists().notEmpty().isString()],
 	updateRole
 )
+
+roleRouter.delete('/:roleId', deleteRole)
 
 export default roleRouter

@@ -4,6 +4,7 @@ import { User, Password, Role, UserRole } from '../models/All'
 import thinky from '../config/db'
 import path from 'path'
 import { UploadedFile } from 'express-fileupload'
+import chalk from 'chalk'
 
 const { r } = thinky
 
@@ -53,8 +54,10 @@ const getUsers = async (req: Request, res: Response) => {
 				index: 'userId',
 			})
 			.zip()
+			.without('id')
 			.eqJoin('roleId', r.table(Role.getTableName()))
 			.zip()
+			.without('id')
 			.filter(filterObject)
 			.skip(Number(from))
 			.limit(Number(to))
@@ -160,21 +163,41 @@ const createUser = async (req: Request, res: Response) => {
 const updateUser = async (req: Request, res: Response) => {
 	try {
 		const { id: userId } = req?.params
+
+		const existingUser = await r
+			.table(User.getTableName())
+			.get(userId)
+			.run()
+
+		if (!existingUser) {
+			res.status(400).json({
+				message: 'User not updated',
+			})
+			return
+		}
+
 		const {
 			firstName,
 			lastName,
 			phoneNumber,
-			profileImgUrl = '',
+			profileImgUrl = existingUser.profileImgUrl,
 			oldPassword = '',
 			newPassword = '',
 			roleId,
+			isActive = existingUser.isActive,
 		} = req?.body
 
 		// update user data
-		const user = await r
+		await r
 			.table(User.getTableName())
 			.get(userId)
-			.update({ firstName, lastName, phoneNumber, profileImgUrl })
+			.update({
+				firstName,
+				lastName,
+				phoneNumber,
+				profileImgUrl,
+				isActive,
+			})
 			.run()
 
 		// update user password
@@ -271,32 +294,27 @@ const deleteUser = async (req: Request, res: Response) => {
 			return
 		}
 
-		const { deleted } = await r
+		await r
 			.table(User.getTableName())
 			.get(userId)
-			.delete()
+			.update({ deletedAt: r.now() })
 			.run()
 
 		// delete password
-		await r
+		/* await r
 			.table(Password.getTableName())
 			.filter(r.row('userId').eq(userId))
 			.delete()
-			.run()
+			.run() */
 
 		// delete userrole
-		await r
+		/* await r
 			.table(UserRole.getTableName())
 			.filter(r.row('userId').eq(userId))
 			.delete()
-			.run()
+			.run() */
 
-		if (deleted) {
-			res.status(200).json({ message: 'User deleted sucessfully' })
-			return
-		}
-
-		res.status(200).json({ message: 'User not deleted' })
+		res.status(200).json({ message: 'User deleted sucessfully' })
 	} catch (error) {
 		res.status(500).json({ message: 'Some error occured' })
 	}
@@ -352,6 +370,58 @@ const uploadProfile = async (req: Request, res: Response) => {
 	}
 }
 
+const insertDefaultUser = async () => {
+	try {
+		const existingUser = await r
+			.table(User.getTableName())
+			.filter({ email: 'admin@gmail.com' })
+			.run()
+
+		if (existingUser.length) {
+			return
+		}
+
+		const salt = bcrypt.genSaltSync()
+		const hashedPassword = bcrypt.hashSync('123456', salt)
+
+		const user = await new User({
+			firstName: 'Administrator',
+			lastName: 'Administrator',
+			email: 'admin@gmail.com',
+			phoneNumber: '',
+			isActive: 1,
+		}).save()
+
+		console.log(user)
+
+		await new Password({
+			userId: user.id,
+			password: hashedPassword,
+		}).save()
+
+		const role = await Role.filter(r.row('level').eq(1)).run()
+
+		if (!role) {
+			console.log(
+				chalk.blue(
+					'Create role first and then update this user with role.'
+				)
+			)
+			return
+		}
+
+		await new UserRole({
+			userId: user.id,
+			roleId: role[0]['id'],
+		}).save()
+
+		console.log(chalk.blue('Default user created'))
+		return
+	} catch (error) {
+		console.log(chalk.red(error))
+	}
+}
+
 export {
 	getUsers,
 	getUser,
@@ -359,4 +429,5 @@ export {
 	updateUser,
 	deleteUser,
 	uploadProfile,
+	insertDefaultUser,
 }

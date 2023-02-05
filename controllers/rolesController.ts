@@ -136,4 +136,28 @@ const updateRole = async (req: Request, res: Response) => {
 	}
 }
 
-export { createRole, updateRole, getRoles }
+// Delete a user
+const deleteRole = async (req: Request, res: Response) => {
+	try {
+		const { roleId } = req?.params
+		const role = await r.table(Role.getTableName()).get(roleId).run()
+
+		if (!role) {
+			res.status(200).json({ message: 'Role not found to delete' })
+			return
+		}
+
+		await r
+			.table(Role.getTableName())
+			.get(roleId)
+			.update({ deletedAt: r.now() })
+			.run()
+
+		res.status(200).json({ message: 'Role deleted' })
+	} catch (error) {
+		console.log(error)
+		res.status(500).json({ message: 'Some error occured' })
+	}
+}
+
+export { createRole, updateRole, getRoles, deleteRole }

@@ -10,6 +10,7 @@ dotenv.config()
 import sessionAuthentication from './middleware/session'
 import { logger } from './middleware/logging'
 import thinky from './config/db'
+import { insertDefaultUser } from './controllers/usersController'
 
 const { r } = thinky
 // Routes
@@ -32,6 +33,7 @@ app.use(
 		limits: { fileSize: 50 * 1024 * 1024 },
 	})
 )
+insertDefaultUser()
 
 // Logger middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
