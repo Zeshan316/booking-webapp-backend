@@ -5,7 +5,7 @@ import { validationResult } from 'express-validator'
 
 const { r } = thinky
 
-// Get all roles and apply filters while fetching
+// Get all users and apply filters while fetching
 const getRoles = async (req: Request, res: Response) => {
 	try {
 		const {
@@ -16,19 +16,18 @@ const getRoles = async (req: Request, res: Response) => {
 			level = '',
 		} = req?.query
 
+		// Count total users
+		const totalUsers = await r
+			.table(Role.getTableName())
+			.count()
+			.run()
+
 		// check is there any check to filter on
 		const filterObject = name.length
 			? r.row('name').match(`(?i)${name}`)
 			: {
 					...(level.length && { level: Number(level) }),
 			  }
-
-		// Count total roles
-		const totalRoles = await r
-			.table(Role.getTableName())
-			.filter(filterObject)
-			.count()
-			.run()
 
 		// check sorting order of data
 		const orderByField =
@@ -44,14 +43,14 @@ const getRoles = async (req: Request, res: Response) => {
 
 		res
 			.status(200)
-			.json({ message: 'All roles', data: { totalRoles, roles } })
+			.json({ message: 'All roles', data: { totalUsers, roles } })
 	} catch (error) {
 		console.log(error)
 		res.status(500).json({ message: 'Some error occured' })
 	}
 }
 
-// Create a new role
+// Create a new user, it's password and role
 const createRole = async (req: Request, res: Response) => {
 	try {
 		const errors = validationResult(req)
@@ -95,7 +94,7 @@ const createRole = async (req: Request, res: Response) => {
 	}
 }
 
-// Update a role
+// Update a user
 const updateRole = async (req: Request, res: Response) => {
 	try {
 		const errors = validationResult(req)
@@ -124,11 +123,11 @@ const updateRole = async (req: Request, res: Response) => {
 			return
 		}
 
-		// update role data
+		// update user data
 		const role = await r
 			.table(Role.getTableName())
 			.get(roleId)
-			.update({ name, updatedAt: r.now() })
+			.update({ name })
 			.run()
 
 		res.status(200).json({ message: 'Role data updated', data: [] })
@@ -137,7 +136,7 @@ const updateRole = async (req: Request, res: Response) => {
 	}
 }
 
-// Delete a role
+// Delete a user
 const deleteRole = async (req: Request, res: Response) => {
 	try {
 		const { roleId } = req?.params

@@ -26,12 +26,6 @@ const getUsers = async (req: Request, res: Response) => {
 			phoneNumber = '',
 		} = req?.query
 
-		// Count total users
-		const totalUsers = await r
-			.table(User.getTableName())
-			.count()
-			.run()
-
 		// check is there any check to filter on
 		let filterObject = {}
 		if (firstName)
@@ -41,6 +35,13 @@ const getUsers = async (req: Request, res: Response) => {
 		if (email) filterObject = r.row('email').match(`(?i)${email}`)
 		if (phoneNumber)
 			filterObject = r.row('phoneNumber').match(`(?i)${phoneNumber}`)
+
+		// Count total users
+		const totalUsers = await r
+			.table(User.getTableName())
+			.filter(filterObject)
+			.count()
+			.run()
 
 		// check sorting order of data
 		const orderByField =
@@ -54,11 +55,9 @@ const getUsers = async (req: Request, res: Response) => {
 			.eqJoin('id', r.table(UserRole.getTableName()), {
 				index: 'userId',
 			})
-			.zip()
-			.without('id')
+			.map((row) => row('left').merge({ userRole: row('right') }))
 			.eqJoin('roleId', r.table(Role.getTableName()))
-			.zip()
-			.without('id')
+			.map((row) => row('left').merge({ role: row('right') }))
 			.filter(filterObject)
 			.skip(Number(from))
 			.limit(Number(to))
@@ -272,6 +271,7 @@ const updateUser = async (req: Request, res: Response) => {
 				phoneNumber,
 				profileImgUrl,
 				isActive,
+				updatedAt: r.now(),
 			})
 			.run()
 

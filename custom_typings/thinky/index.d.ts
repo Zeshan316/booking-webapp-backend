@@ -146,7 +146,8 @@ declare module 'thinky' {
 		expr(stuff: any): Expression<any>
 
 		now(): Time
-
+		date(): Date
+		time(a: any, b: any, c: any, d: any): any
 		// Control Structures
 		branch(
 			test: Expression<boolean>,
@@ -440,13 +441,14 @@ declare module 'thinky' {
 
 	interface Expression<T> extends Writeable, Operation<T> {
 		(prop: string): Expression<any>
-		merge(query: Expression<Object>): Expression<Object>
+		merge(query: any): any
 		append(prop: string): Expression<Object>
 		contains(prop: string): Expression<boolean>
 
 		and(b: boolean): Expression<boolean>
 		or(b: boolean): Expression<boolean>
 		eq(v: any): Expression<boolean>
+		during(a: any, b: any): Expression<any>
 		ne(v: any): Expression<boolean>
 		not(): Expression<boolean>
 

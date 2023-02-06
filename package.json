@@ -14,8 +14,10 @@
     "@types/chalk": "^2.2.0",
     "@types/express-fileupload": "^1.4.1",
     "@types/moment": "^2.13.0",
+    "@types/rethinkdb": "^2.3.17",
     "bcrypt": "^5.1.0",
     "chalk": "^4.1.2",
+    "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
@@ -26,6 +28,7 @@
     "moment-timezone": "^0.5.40",
     "mongoose": "^6.8.3",
     "nodemailer": "^6.9.0",
+    "rethinkdb": "^2.4.2",
     "thinky": "^2.3.9",
     "uuid": "^9.0.0"
   },
