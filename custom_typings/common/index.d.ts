@@ -5,6 +5,7 @@ interface userModelProps {
 	email: string
 	phoneNumber: string
 	profileImgUrl: string
+	role: string
 	createdAt: Date | any
 	updatedAt: Date | any
 }

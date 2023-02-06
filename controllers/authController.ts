@@ -38,9 +38,9 @@ const login = async (req: Request, res: Response) => {
 
 		const userPasswordData: userPasswordModelProps[] = await r
 			.table(Password.getTableName())
-			.filter(r.row('userId').eq(userId))
 			.eqJoin('userId', r.table(User.getTableName()))
 			.zip()
+			.filter(r.row('userId').eq(userId))
 			.run()
 
 		const { password: userPassword = false } =
@@ -79,7 +79,13 @@ const login = async (req: Request, res: Response) => {
 			}
 		)
 
-		res.status(200).json({ message: 'Token generated', data: token })
+		res.status(200).json({
+			message: 'Token generated',
+			data: {
+				token,
+				user: { ...user[0], role: userRole },
+			},
+		})
 	} catch (error: any) {
 		res.status(500).json({ message: error.toString() })
 	}
