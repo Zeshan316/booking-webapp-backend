@@ -1,7 +1,7 @@
 import express, { IRouter } from 'express'
 const authRouter: IRouter = express.Router()
 import { check } from 'express-validator'
-import { login } from '../controllers/authController'
+import { login, getUser } from '../controllers/authController'
 
 authRouter.post(
 	'/',
@@ -11,5 +11,6 @@ authRouter.post(
 	],
 	login
 )
+authRouter.get('/', getUser)
 
 export default authRouter

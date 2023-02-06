@@ -104,4 +104,32 @@ const _getUserRole = async (userId: string): Promise<string> => {
 	return userRole[0]['name'] as string
 }
 
-export { login }
+const getUser = async (req: Request, res: Response) => {
+	try {
+		const user: userModelProps[] = await r
+			.table(User.getTableName())
+			.filter({ id: req.userId, isActive: 1, deletedAt: null })
+			.run()
+
+		const { email: userEmail = false } = user[0] || {}
+
+		if (!userEmail) {
+			res
+				.status(400)
+				.json({ message: 'User does not exist', data: [] })
+			return
+		}
+
+		const userRole = _getUserRole(req.userId as string)
+
+		res.status(200).json({
+			data: {
+				user: { ...user[0], role: userRole },
+			},
+		})
+	} catch (error: any) {
+		res.status(500).json({ message: error.toString() })
+	}
+}
+
+export { login, getUser }
