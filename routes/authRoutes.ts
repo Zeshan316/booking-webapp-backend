@@ -2,6 +2,7 @@ import express, { IRouter } from 'express'
 const authRouter: IRouter = express.Router()
 import { check } from 'express-validator'
 import { login, getUser } from '../controllers/authController'
+import sessionAuthentication from '../middleware/session'
 
 authRouter.post(
 	'/',
@@ -11,6 +12,6 @@ authRouter.post(
 	],
 	login
 )
-authRouter.get('/', getUser)
+authRouter.get('/', sessionAuthentication, getUser)
 
 export default authRouter

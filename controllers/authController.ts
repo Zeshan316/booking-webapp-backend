@@ -122,8 +122,13 @@ const getUser = async (req: Request, res: Response) => {
 
 		const userRole = _getUserRole(req.userId as string)
 
+		// Fetching token from header
+		const bearerToken = req.headers?.authorization as string
+		const [, token] = bearerToken.split(' ')
+
 		res.status(200).json({
 			data: {
+				token: token,
 				user: { ...user[0], role: userRole },
 			},
 		})
