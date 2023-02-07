@@ -55,9 +55,13 @@ const getUsers = async (req: Request, res: Response) => {
 			.eqJoin('id', r.table(UserRole.getTableName()), {
 				index: 'userId',
 			})
-			.map((row) => row('left').merge({ userRole: row('right') }))
+			.without('createdAt', 'updatedAt', 'deletedAt')
+			.zip()
 			.eqJoin('roleId', r.table(Role.getTableName()))
-			.map((row) => row('left').merge({ role: row('right') }))
+			.map((row) => {
+				return row('left').merge({ role: row('right') })
+			})
+			.without('id')
 			.filter(filterObject)
 			.skip(Number(from))
 			.limit(Number(to))
