@@ -111,7 +111,7 @@ const getUser = async (req: Request, res: Response) => {
 			.filter({ id: req.userId, isActive: 1, deletedAt: null })
 			.run()
 
-		const { email: userEmail = false } = user[0] || {}
+		const { email: userEmail = false, id: userId } = user[0] || {}
 
 		if (!userEmail) {
 			res
@@ -120,7 +120,7 @@ const getUser = async (req: Request, res: Response) => {
 			return
 		}
 
-		const userRole = _getUserRole(req.userId as string)
+		const userRole: string = await _getUserRole(userId as string)
 
 		// Fetching token from header
 		const bearerToken = req.headers?.authorization as string
