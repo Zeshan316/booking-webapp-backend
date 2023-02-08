@@ -338,7 +338,7 @@ const deleteUser = async (req: Request, res: Response) => {
 		await r
 			.table(User.getTableName())
 			.get(userId)
-			.update({ deletedAt: r.now() })
+			.update({ deletedAt: r.now(), isActive: 0 })
 			.run()
 
 		// delete password
