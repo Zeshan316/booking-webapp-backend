@@ -6,4 +6,7 @@ const rideStatuses: GenericObject = {
 	cancelled: 'cancelled',
 }
 
-export { rideDirections, rideStatuses }
+const defaultProfileUrl: string =
+	'static/images/defaultProfileImg.png'
+
+export { rideDirections, rideStatuses, defaultProfileUrl }

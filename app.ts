@@ -27,8 +27,15 @@ const port = process.env.DEV_PORT || 4000
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-app.use(helmet())
-app.use(cors())
+app.use(
+	helmet({
+		crossOriginResourcePolicy: false,
+	})
+)
+const corsOptions = {
+	origin: 'http://localhost:3000',
+}
+app.use(cors(corsOptions))
 app.use(
 	fileUpload({
 		createParentPath: true,

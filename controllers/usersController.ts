@@ -3,9 +3,9 @@ import bcrypt from 'bcrypt'
 import { User, Password, Role, UserRole } from '../models/All'
 import thinky from '../config/db'
 import path from 'path'
-import { UploadedFile } from 'express-fileupload'
 import chalk from 'chalk'
 import { validationResult } from 'express-validator'
+import { defaultProfileUrl } from '../common/constants'
 
 const { r } = thinky
 
@@ -159,6 +159,7 @@ const createUser = async (req: Request, res: Response) => {
 			lastName,
 			email,
 			phoneNumber,
+			profileImgUrl: defaultProfileUrl,
 		}).save()
 
 		await new Password({
@@ -255,8 +256,9 @@ const updateUser = async (req: Request, res: Response) => {
 
 		if (!existingUser) {
 			res.status(400).json({
-				message: 'User not updated',
+				message: 'User not found updated',
 			})
+			return
 		}
 
 		const {
@@ -432,9 +434,6 @@ const insertDefaultUser = async () => {
 			phoneNumber: '',
 			isActive: 1,
 		}).save()
-
-		console.log(user)
-
 		await new Password({
 			userId: user.id,
 			password: hashedPassword,
