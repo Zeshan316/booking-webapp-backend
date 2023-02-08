@@ -236,12 +236,17 @@ const _updateUserRole = async (
 // Update a user
 const updateUser = async (req: Request, res: Response) => {
 	try {
-		const { id: userId } = req?.params
-
-		if (!userId) {
-			res.status(400).json({ message: 'User id not found' })
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.status(400).json({
+				message: `${errors.array()[0]['msg']} for ${
+					errors.array()[0]['param']
+				}`,
+			})
 			return
 		}
+
+		const { id: userId } = req?.params
 
 		const existingUser = await r
 			.table(User.getTableName())
@@ -311,11 +316,17 @@ const updateUser = async (req: Request, res: Response) => {
 // Delete a user
 const deleteUser = async (req: Request, res: Response) => {
 	try {
-		const { id: userId } = req?.params
-		if (!userId) {
-			res.status(400).json({ message: 'User id not found' })
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.status(400).json({
+				message: `${errors.array()[0]['msg']} for ${
+					errors.array()[0]['param']
+				}`,
+			})
 			return
 		}
+
+		const { id: userId } = req?.params
 
 		const user = await r.table(User.getTableName()).get(userId).run()
 

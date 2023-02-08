@@ -1,6 +1,6 @@
 import express, { IRouter } from 'express'
 const userRouter: IRouter = express.Router()
-import { check } from 'express-validator'
+import { check, param, sanitize } from 'express-validator'
 
 import {
 	getUsers,
@@ -17,7 +17,7 @@ userRouter.post(
 	'/',
 	[
 		check('firstName').exists().notEmpty().isLength({ max: 60 }),
-		check('lastName').optional(),
+		check('lastName').exists().notEmpty().isLength({ max: 60 }),
 		check('email')
 			.exists()
 			.notEmpty()
@@ -28,7 +28,17 @@ userRouter.post(
 	createUser
 )
 userRouter.post('/uploadAvtar/:id', uploadProfile)
-userRouter.patch('/:id', updateUser)
-userRouter.delete('/:id', deleteUser)
+userRouter.patch(
+	'/:id',
+	[param('id').exists().notEmpty()],
+	[sanitize('id').trim()],
+	updateUser
+)
+userRouter.delete(
+	'/:id',
+	[param('id').exists().notEmpty()],
+	[sanitize('id').trim()],
+	deleteUser
+)
 
 export default userRouter
