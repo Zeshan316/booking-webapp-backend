@@ -17,7 +17,7 @@ userRouter.post(
 	'/',
 	[
 		check('firstName').exists().notEmpty().isLength({ max: 60 }),
-		check('lastName').exists().notEmpty().isLength({ max: 60 }),
+		check('lastName').optional(),
 		check('email')
 			.exists()
 			.notEmpty()

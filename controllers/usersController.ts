@@ -138,7 +138,7 @@ const createUser = async (req: Request, res: Response) => {
 			email,
 			password,
 			phoneNumber,
-			roleId,
+			roleId = '',
 		} = req.body
 
 		const alreadyUser = await r
@@ -147,7 +147,7 @@ const createUser = async (req: Request, res: Response) => {
 			.run()
 
 		if (alreadyUser.length) {
-			res.status(200).json({ message: 'User exists already' })
+			res.status(400).json({ message: 'User exists already' })
 			return
 		}
 
