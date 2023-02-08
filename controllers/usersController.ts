@@ -92,7 +92,7 @@ const getUser = async (req: Request, res: Response) => {
 			.eqJoin('userId', r.table(User.getTableName()))
 			.zip()
 			.eqJoin('roleId', r.table(Role.getTableName()))
-			.zip()
+			.map((row) => row('left').merge({ role: row('right') }))
 			.run()
 
 		if (user.length) {
