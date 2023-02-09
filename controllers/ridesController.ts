@@ -23,7 +23,9 @@ const getRides = async (req: Request, res: Response) => {
 		} = req?.query
 
 		// check is there any check to filter on
+		// let filterObject = { deletedAt: null }
 		let filterObject = {}
+		if (status) filterObject = r.row('status').match(`(?i)${status}`)
 		if (pickupId) filterObject = r.row('pickupId').eq(pickupId)
 		if (destinationId)
 			filterObject = r.row('destinationId').eq(destinationId)
@@ -45,6 +47,7 @@ const getRides = async (req: Request, res: Response) => {
 		const totaRides = await r
 			.table(Ride.getTableName())
 			.filter(filterObject)
+			.filter({ deletedAt: null })
 			.count()
 			.run()
 
@@ -64,6 +67,7 @@ const getRides = async (req: Request, res: Response) => {
 			.eqJoin('destinationId', r.table(Location.getTableName()))
 			.map((row) => row('left').merge({ destination: row('right') }))
 			.filter(filterObject)
+			.filter({ deletedAt: null })
 			.skip(Number(from))
 			.limit(Number(to))
 			.run()
@@ -142,10 +146,10 @@ const createRide = async (req: Request, res: Response) => {
 			.filter(r.row('createdAt').gt(previousDateTime))
 			.run()
 
-		if (rides.length) {
+		/* if (rides.length) {
 			res.status(400).json({ message: 'You already created a ride' })
 			return
-		}
+		} */
 
 		const ride = await new Ride({
 			userId: req.userId,
