@@ -55,7 +55,7 @@ const login = async (req: Request, res: Response) => {
 
 		if (!bcrypt.compareSync(password, userPassword)) {
 			res.status(400).json({
-				message: 'Email or password do not match',
+				message: 'Email or password is invalid',
 				data: [],
 			})
 			return
