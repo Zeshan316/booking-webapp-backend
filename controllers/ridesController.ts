@@ -22,6 +22,8 @@ const getRides = async (req: Request, res: Response) => {
 			status = '',
 		} = req?.query
 
+		console.log(req.userId)
+
 		// check is there any check to filter on
 		// let filterObject = { deletedAt: null }
 		let filterObject = {}
@@ -46,6 +48,7 @@ const getRides = async (req: Request, res: Response) => {
 		// Count total rides
 		const totaRides = await r
 			.table(Ride.getTableName())
+			.filter(r.row('userId').eq(req.userId))
 			.filter(filterObject)
 			.filter({ deletedAt: null })
 			.count()
@@ -66,6 +69,7 @@ const getRides = async (req: Request, res: Response) => {
 			.map((row) => row('left').merge({ pickup: row('right') }))
 			.eqJoin('destinationId', r.table(Location.getTableName()))
 			.map((row) => row('left').merge({ destination: row('right') }))
+			.filter(r.row('userId').eq(req.userId))
 			.filter(filterObject)
 			.filter({ deletedAt: null })
 			.skip(Number(from))
