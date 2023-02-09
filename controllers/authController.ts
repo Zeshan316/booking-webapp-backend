@@ -141,8 +141,7 @@ const getUser = async (req: Request, res: Response) => {
 				token: token,
 				user: {
 					...user[0],
-					role: userRole['name'],
-					roleId: userRole['id'],
+					role: userRole,
 				},
 			},
 		})
