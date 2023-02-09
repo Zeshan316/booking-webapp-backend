@@ -62,13 +62,16 @@ const login = async (req: Request, res: Response) => {
 		}
 
 		// Get user role
-		const userRole: string = await _getUserRole(userId as string)
+		const userRole: GenericObject = await _getUserRole(
+			userId as string
+		)
 
 		// Create a token
 		const payload = {
 			user: {
 				id: userId,
-				role: userRole,
+				role: userRole['name'],
+				roleId: userRole['id'],
 			},
 		}
 		const token = await jwt.sign(
@@ -91,7 +94,9 @@ const login = async (req: Request, res: Response) => {
 	}
 }
 
-const _getUserRole = async (userId: string): Promise<string> => {
+const _getUserRole = async (
+	userId: string
+): Promise<GenericObject> => {
 	const userRole = await r
 		.table(UserRole.getTableName())
 		.filter(r.row('userId').eq(userId))
@@ -101,7 +106,10 @@ const _getUserRole = async (userId: string): Promise<string> => {
 		.zip()
 		.run()
 
-	return userRole[0]['name'] as string
+	return {
+		id: userRole[0]['id'],
+		name: userRole[0]['name'] as string,
+	}
 }
 
 const getUser = async (req: Request, res: Response) => {
@@ -120,7 +128,9 @@ const getUser = async (req: Request, res: Response) => {
 			return
 		}
 
-		const userRole: string = await _getUserRole(userId as string)
+		const userRole: GenericObject = await _getUserRole(
+			userId as string
+		)
 
 		// Fetching token from header
 		const bearerToken = req.headers?.authorization as string
@@ -129,7 +139,11 @@ const getUser = async (req: Request, res: Response) => {
 		res.status(200).json({
 			data: {
 				token: token,
-				user: { ...user[0], role: userRole },
+				user: {
+					...user[0],
+					role: userRole['name'],
+					roleId: userRole['id'],
+				},
 			},
 		})
 	} catch (error: any) {

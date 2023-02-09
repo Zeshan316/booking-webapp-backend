@@ -134,7 +134,7 @@ const createUser = async (req: Request, res: Response) => {
 			email,
 			password,
 			phoneNumber,
-			roleId = '',
+			roleId,
 		} = req.body
 
 		const alreadyUser = await r
@@ -221,6 +221,8 @@ const _updateUserRole = async (
 	userId: string,
 	roleId: string
 ): Promise<boolean> => {
+	if (!roleId) return false
+
 	const { replaced, errors } = await r
 		.table(UserRole.getTableName())
 		.filter(r.row('userId').eq(userId))
@@ -257,11 +259,14 @@ const updateUser = async (req: Request, res: Response) => {
 			return
 		}
 
+		if (req.files) {
+			await uploadProfile(userId, req.files)
+		}
+
 		const {
 			firstName,
 			lastName,
-			phoneNumber,
-			profileImgUrl = existingUser.profileImgUrl,
+			phoneNumber = existingUser.phoneNumber,
 			oldPassword = '',
 			newPassword = '',
 			roleId,
@@ -276,7 +281,6 @@ const updateUser = async (req: Request, res: Response) => {
 				firstName,
 				lastName,
 				phoneNumber,
-				profileImgUrl,
 				isActive,
 				updatedAt: r.now(),
 			})
@@ -359,28 +363,18 @@ const deleteUser = async (req: Request, res: Response) => {
 	}
 }
 
-const uploadProfile = async (req: Request, res: Response) => {
+const uploadProfile = async (userId: string, files: any) => {
 	try {
-		if (!req.files || Object.keys(req.files).length === 0) {
-			return res.status(400).send('No files were uploaded.')
-		}
-
-		const { id: userId } = req?.params
-		if (!userId) {
-			res.status(400).json({ message: 'User id not found.' })
-		}
-
 		const allowedExtensions = ['.png', '.jpg', '.jpeg']
-		const profileImg: any = req.files?.profile
+		const profileImg: any = files?.profileImg
 
 		if (!allowedExtensions.includes(path.extname(profileImg.name))) {
-			res.status(400).json({
-				message: 'Only png, jpg files are allowed to upload.',
-			})
-			return
+			return false
 		}
 
-		const fileName: string = `${userId}-${profileImg.name}`
+		const fileName: string = `${userId}-profilepic${path.extname(
+			profileImg.name
+		)}`
 		const uploadPath: string = path.join(
 			path.resolve(__dirname, '..'),
 			`public/images/${fileName}`
@@ -388,8 +382,7 @@ const uploadProfile = async (req: Request, res: Response) => {
 
 		profileImg.mv(uploadPath, async function (err: any) {
 			if (err) {
-				res.status(400).json({ message: err?.message })
-				return
+				return false
 			}
 
 			await r
@@ -398,14 +391,10 @@ const uploadProfile = async (req: Request, res: Response) => {
 				.update({ profileImgUrl: `static/images/${fileName}` })
 				.run()
 
-			res.status(200).json({
-				message: 'File uploaded!',
-				data: { filePath: `static/images/${fileName}` },
-			})
-			return
+			return true
 		})
 	} catch (error: any) {
-		res.status(500).json({ message: error?.message })
+		return false
 	}
 }
 

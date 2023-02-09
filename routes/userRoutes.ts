@@ -27,10 +27,14 @@ userRouter.post(
 	],
 	createUser
 )
-userRouter.post('/uploadAvtar/:id', uploadProfile)
+// userRouter.post('/uploadAvtar/:id', uploadProfile)
 userRouter.patch(
 	'/:id',
-	[param('id').exists().notEmpty()],
+	[
+		param('id').exists().notEmpty(),
+		check('firstName').exists().notEmpty().isLength({ max: 60 }),
+		check('lastName').exists().notEmpty().isLength({ max: 60 }),
+	],
 	[sanitize('id').trim()],
 	updateUser
 )

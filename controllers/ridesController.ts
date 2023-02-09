@@ -243,7 +243,7 @@ const deleteRide = async (req: Request, res: Response) => {
 			.update({ deletedAt: r.now() })
 			.run()
 
-		res.status(200).json({ message: 'User not deleted' })
+		res.status(200).json({ message: 'Ride deleted' })
 	} catch (error) {
 		res.status(500).json({ message: 'Some error occured' })
 	}
