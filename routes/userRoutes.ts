@@ -16,14 +16,22 @@ userRouter.get('/:id', getUser)
 userRouter.post(
 	'/',
 	[
-		check('firstName').exists().notEmpty().isLength({ max: 60 }),
-		check('lastName').exists().notEmpty().isLength({ max: 60 }),
+		check('firstName')
+			.exists()
+			.notEmpty()
+			.isLength({ min: 2, max: 60 }),
+		check('lastName')
+			.exists()
+			.notEmpty()
+			.isLength({ min: 2, max: 60 }),
 		check('email')
 			.exists()
 			.notEmpty()
 			.isEmail()
+			.normalizeEmail()
 			.isLength({ max: 60 }),
 		check('password').exists().notEmpty().isLength({ max: 60 }),
+		check('roleId').exists().notEmpty(),
 	],
 	createUser
 )

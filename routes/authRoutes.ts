@@ -7,8 +7,12 @@ import sessionAuthentication from '../middleware/session'
 authRouter.post(
 	'/',
 	[
-		check('email').exists().notEmpty(),
-		check('password').exists().notEmpty(),
+		check('email').exists().notEmpty().isEmail().normalizeEmail(),
+		check('password')
+			.exists()
+			.notEmpty()
+			.trim()
+			.isLength({ max: 30 }),
 	],
 	login
 )

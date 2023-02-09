@@ -22,8 +22,6 @@ const getRides = async (req: Request, res: Response) => {
 			status = '',
 		} = req?.query
 
-		console.log(req.userId)
-
 		// check is there any check to filter on
 		// let filterObject = { deletedAt: null }
 		let filterObject = {}
@@ -234,6 +232,17 @@ const updateRide = async (req: Request, res: Response) => {
 // Delete a ride
 const deleteRide = async (req: Request, res: Response) => {
 	try {
+		const errors = validationResult(req)
+
+		if (!errors.isEmpty()) {
+			res.status(400).json({
+				message: `${errors.array()[0]['msg']} for ${
+					errors.array()[0]['param']
+				}`,
+			})
+			return
+		}
+
 		const { id: rideId } = req?.params
 		const ride = await r.table(Ride.getTableName()).get(rideId).run()
 

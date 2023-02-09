@@ -1,6 +1,6 @@
 import express, { IRouter } from 'express'
 const rideRouter: IRouter = express.Router()
-import { check } from 'express-validator'
+import { check, param } from 'express-validator'
 
 import {
 	getRides,
@@ -11,7 +11,7 @@ import {
 } from '../controllers/ridesController'
 
 rideRouter.get('/', getRides)
-rideRouter.get('/:id', getRide)
+rideRouter.get('/:id', [param('id').exists().notEmpty()], getRide)
 rideRouter.post(
 	'/',
 	[
@@ -23,7 +23,15 @@ rideRouter.post(
 	],
 	createRide
 )
-rideRouter.patch('/:id', updateRide)
-rideRouter.delete('/:id', deleteRide)
+rideRouter.patch(
+	'/:id',
+	[param('id').exists().notEmpty()],
+	updateRide
+)
+rideRouter.delete(
+	'/:id',
+	[param('id').exists().notEmpty()],
+	deleteRide
+)
 
 export default rideRouter
