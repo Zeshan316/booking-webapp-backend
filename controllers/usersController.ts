@@ -9,10 +9,6 @@ import { defaultProfileUrl } from '../common/constants'
 
 const { r } = thinky
 
-const resetPassword = async (req: Request, res: Response) => {
-	res.status(200).json({ message: 'resetPassword endpoint...' })
-}
-
 // Get all users and apply filters while fetching
 const getUsers = async (req: Request, res: Response) => {
 	try {
