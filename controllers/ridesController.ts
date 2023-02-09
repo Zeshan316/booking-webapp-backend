@@ -94,7 +94,7 @@ const getRide = async (req: Request, res: Response) => {
 			.run()
 
 		if (ride.length) {
-			res.status(200).json({ message: 'Ride fetched', data: ride })
+			res.status(200).json({ message: 'Ride fetched', data: ride[0] })
 			return
 		}
 
