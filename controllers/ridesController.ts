@@ -198,6 +198,13 @@ const updateRide = async (req: Request, res: Response) => {
 			return
 		}
 
+		if (existingRide.status.toLowerCase() === 'completed') {
+			res
+				.status(200)
+				.json({ message: 'Completed rides will not be updated' })
+			return
+		}
+
 		const {
 			tripDate,
 			tripTime,
