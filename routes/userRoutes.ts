@@ -8,7 +8,7 @@ import {
 	createUser,
 	updateUser,
 	deleteUser,
-	uploadProfile,
+	updateUserStatus,
 } from '../controllers/usersController'
 
 userRouter.get('/', getUsers)
@@ -35,6 +35,12 @@ userRouter.post(
 	],
 	createUser
 )
+userRouter.put(
+	'/change-status/:id',
+	[param('id').exists().notEmpty()],
+	[sanitize('id').trim()],
+	updateUserStatus
+)
 // userRouter.post('/uploadAvtar/:id', uploadProfile)
 userRouter.patch(
 	'/:id',
@@ -46,6 +52,7 @@ userRouter.patch(
 	[sanitize('id').trim()],
 	updateUser
 )
+
 userRouter.delete(
 	'/:id',
 	[param('id').exists().notEmpty()],

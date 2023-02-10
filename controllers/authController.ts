@@ -83,7 +83,7 @@ const login = async (req: Request, res: Response) => {
 		)
 
 		res.status(200).json({
-			message: 'Token generated',
+			message: 'User logged in successfully',
 			data: {
 				token,
 				user: { ...user[0], role: userRole },

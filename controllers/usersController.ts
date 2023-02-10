@@ -265,7 +265,7 @@ const updateUser = async (req: Request, res: Response) => {
 
 		if (!existingUser) {
 			res.status(400).json({
-				message: 'User not found updated',
+				message: 'User not found to update',
 			})
 			return
 		}
@@ -321,6 +321,50 @@ const updateUser = async (req: Request, res: Response) => {
 		}
 
 		res.status(200).json({ message: 'User data updated' })
+	} catch (error) {
+		res.status(500).json({ message: 'Some error occured' })
+	}
+}
+
+// Update a user
+const updateUserStatus = async (req: Request, res: Response) => {
+	try {
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.status(400).json({
+				message: `${errors.array()[0]['msg']} for ${
+					errors.array()[0]['param']
+				}`,
+			})
+			return
+		}
+
+		const { id: userId } = req?.params
+
+		const existingUser = await r
+			.table(User.getTableName())
+			.get(userId)
+			.run()
+
+		if (!existingUser) {
+			res.status(400).json({
+				message: 'User not found to update',
+			})
+			return
+		}
+
+		const activeStatus = existingUser.isActive === 1 ? 0 : 1
+
+		// update user data
+		await r
+			.table(User.getTableName())
+			.get(userId)
+			.update({
+				isActive: activeStatus,
+			})
+			.run()
+
+		res.status(200).json({ message: 'User status updated' })
 	} catch (error) {
 		res.status(500).json({ message: 'Some error occured' })
 	}
@@ -466,4 +510,5 @@ export {
 	deleteUser,
 	uploadProfile,
 	insertDefaultUser,
+	updateUserStatus,
 }
