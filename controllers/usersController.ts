@@ -36,6 +36,7 @@ const getUsers = async (req: Request, res: Response) => {
 		const totalUsers = await r
 			.table(User.getTableName())
 			.filter(filterObject)
+			.filter({ deletedAt: null })
 			.count()
 			.run()
 
@@ -59,6 +60,7 @@ const getUsers = async (req: Request, res: Response) => {
 			})
 			.without('id')
 			.filter(filterObject)
+			.filter({ deletedAt: null })
 			.skip(Number(from))
 			.limit(Number(to))
 			.run()
@@ -163,11 +165,20 @@ const createUser = async (req: Request, res: Response) => {
 			password: hashedPassword,
 		}).save()
 
+		const existingRole = r
+			.table(Role.getTableName())
+			.get(roleId)
+			.run()
+
 		const role = await Role.filter(r.row('name').eq('User')).run()
 
 		await new UserRole({
 			userId: user.id,
-			roleId: roleId ? roleId : role.length ? role[0]['id'] : '0',
+			roleId: existingRole?.id
+				? existingRole.id
+				: role.length
+				? role[0]['id']
+				: '0',
 		}).save()
 
 		res.status(201).json({ message: 'User created successfully.' })
