@@ -23,7 +23,7 @@ const login = async (req: Request, res: Response) => {
 
 		const user: userModelProps[] = await r
 			.table(User.getTableName())
-			.filter({ email, isActive: 1, deletedAt: null })
+			.filter({ email, deletedAt: null })
 			.run()
 
 		const { email: userEmail = false, id: userId = null } =
@@ -116,7 +116,7 @@ const getUser = async (req: Request, res: Response) => {
 	try {
 		const user: userModelProps[] = await r
 			.table(User.getTableName())
-			.filter({ id: req.userId, isActive: 1, deletedAt: null })
+			.filter({ id: req.userId, deletedAt: null })
 			.run()
 
 		const { email: userEmail = false, id: userId } = user[0] || {}

@@ -165,7 +165,7 @@ const createUser = async (req: Request, res: Response) => {
 			password: hashedPassword,
 		}).save()
 
-		const existingRole = r
+		const existingRole = await r
 			.table(Role.getTableName())
 			.get(roleId)
 			.run()
