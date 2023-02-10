@@ -448,7 +448,7 @@ declare module 'thinky' {
 		and(b: boolean): Expression<boolean>
 		or(b: boolean): Expression<boolean>
 		eq(v: any): Expression<boolean>
-		during(a: any, b: any): Expression<any>
+		during(a: any, b: any, c: any): Expression<any>
 		ne(v: any): Expression<boolean>
 		not(): Expression<boolean>
 

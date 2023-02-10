@@ -23,7 +23,6 @@ const getRides = async (req: Request, res: Response) => {
 		} = req?.query
 
 		// check is there any check to filter on
-		// let filterObject = { deletedAt: null }
 		let filterObject = {}
 		if (status) filterObject = r.row('status').match(`(?i)${status}`)
 		if (pickupId) filterObject = r.row('pickupId').eq(pickupId)
@@ -33,14 +32,17 @@ const getRides = async (req: Request, res: Response) => {
 
 		if (tripStartDateTime && tripEndDateTime) {
 			const fromDate = dayjs(
-				dayjs(tripStartDateTime as string).format(
-					'YYYY-MM-DD HH:mm:ss'
-				)
+				dayjs(tripStartDateTime as string).format('YYYY-MM-DD HH:mm')
 			).toDate()
 			const toDate = dayjs(
-				dayjs(tripEndDateTime as string).format('YYYY-MM-DD HH:mm:ss')
+				dayjs(tripEndDateTime as string).format('YYYY-MM-DD HH:mm')
 			).toDate()
-			filterObject = r.row('tripDateTime').during(fromDate, toDate)
+
+			// These will be used to filter records inclusive these ranges
+			filterObject = r.row('tripDateTime').during(fromDate, toDate, {
+				leftBound: 'closed',
+				rightBound: 'closed',
+			})
 		}
 
 		// Count total rides
