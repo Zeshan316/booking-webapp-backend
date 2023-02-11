@@ -326,7 +326,7 @@ const updateUser = async (req: Request, res: Response) => {
 	}
 }
 
-// Update a user
+// Update a user status
 const updateUserStatus = async (req: Request, res: Response) => {
 	try {
 		const errors = validationResult(req)

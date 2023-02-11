@@ -17,6 +17,7 @@ const getRides = async (req: Request, res: Response) => {
 			to = 10,
 			pickupId = '',
 			destinationId = '',
+			direction = '',
 			tripStartDateTime = '',
 			tripEndDateTime = '',
 			status = '',
@@ -27,6 +28,10 @@ const getRides = async (req: Request, res: Response) => {
 			req.userRole?.toLocaleLowerCase() === 'driver'
 				? {}
 				: r.row('userId').eq(req.userId)
+
+		const directionFilter = direction.length
+			? r.row('direction').match(`(?i)${direction}`)
+			: {}
 
 		let filterObject = {}
 		if (status) filterObject = r.row('status').match(`(?i)${status}`)
@@ -53,6 +58,8 @@ const getRides = async (req: Request, res: Response) => {
 		// Count total rides
 		const totaRides = await r
 			.table(Ride.getTableName())
+
+			.filter(directionFilter)
 			.filter(userIdFilter)
 			.filter(filterObject)
 			.filter({ deletedAt: null })
@@ -75,6 +82,7 @@ const getRides = async (req: Request, res: Response) => {
 			.eqJoin('destinationId', r.table(Location.getTableName()))
 			.map((row) => row('left').merge({ destination: row('right') }))
 			.filter(userIdFilter)
+			.filter(directionFilter)
 			.filter(filterObject)
 			.filter({ deletedAt: null })
 			.skip(Number(from))
@@ -243,6 +251,54 @@ const updateRide = async (req: Request, res: Response) => {
 	}
 }
 
+// Update a ride status
+const updateRideStatus = async (req: Request, res: Response) => {
+	try {
+		const errors = validationResult(req)
+		if (!errors.isEmpty()) {
+			res.status(400).json({
+				message: `${errors.array()[0]['msg']} for ${
+					errors.array()[0]['param']
+				}`,
+			})
+			return
+		}
+
+		const { id: rideId } = req?.params
+
+		const existingRide = await r
+			.table(Ride.getTableName())
+			.get(rideId)
+			.run()
+
+		if (!existingRide) {
+			res.status(400).json({
+				message: 'Ride not found to update',
+			})
+			return
+		}
+
+		const { rideStatus } = req.body
+
+		const rideStatusStr = Boolean(rideStatus)
+			? 'completed'
+			: 'awaiting'
+
+		// update user data
+		await r
+			.table(Ride.getTableName())
+			.get(rideId)
+			.update({
+				status: rideStatusStr,
+			})
+			.run()
+
+		res.status(200).json({ message: 'Ride status updated' })
+	} catch (error) {
+		res.status(500).json({ message: 'Some error occured' })
+	}
+}
+
 // Delete a ride
 const deleteRide = async (req: Request, res: Response) => {
 	try {
@@ -276,4 +332,11 @@ const deleteRide = async (req: Request, res: Response) => {
 	}
 }
 
-export { getRides, getRide, createRide, updateRide, deleteRide }
+export {
+	getRides,
+	getRide,
+	createRide,
+	updateRide,
+	updateRideStatus,
+	deleteRide,
+}

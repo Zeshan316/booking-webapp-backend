@@ -8,6 +8,7 @@ import {
 	createRide,
 	updateRide,
 	deleteRide,
+	updateRideStatus,
 } from '../controllers/ridesController'
 
 rideRouter.get('/', getRides)
@@ -23,11 +24,19 @@ rideRouter.post(
 	],
 	createRide
 )
+
+rideRouter.put(
+	'/change-status/:id',
+	[param('id').exists().notEmpty()],
+	updateRideStatus
+)
+
 rideRouter.patch(
 	'/:id',
 	[param('id').exists().notEmpty()],
 	updateRide
 )
+
 rideRouter.delete(
 	'/:id',
 	[param('id').exists().notEmpty()],
