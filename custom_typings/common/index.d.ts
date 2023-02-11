@@ -18,7 +18,10 @@ interface userPasswordModelProps {
 	updatedAt: Date | any
 }
 
-interface AuthResponse {}
+interface Role {
+	name: string
+	level: number
+}
 
 declare namespace Express {
 	interface Request {

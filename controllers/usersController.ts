@@ -453,55 +453,6 @@ const uploadProfile = async (userId: string, files: any) => {
 	}
 }
 
-const insertDefaultUser = async () => {
-	try {
-		const existingUser = await r
-			.table(User.getTableName())
-			.filter({ email: 'admin@gmail.com' })
-			.run()
-
-		if (existingUser.length) {
-			return
-		}
-
-		const salt = bcrypt.genSaltSync()
-		const hashedPassword = bcrypt.hashSync('123456', salt)
-
-		const user = await new User({
-			firstName: 'Administrator',
-			lastName: 'Administrator',
-			email: 'admin@gmail.com',
-			phoneNumber: '',
-			isActive: 1,
-		}).save()
-		await new Password({
-			userId: user.id,
-			password: hashedPassword,
-		}).save()
-
-		const role = await Role.filter(r.row('level').eq(1)).run()
-
-		if (!role) {
-			console.log(
-				chalk.blue(
-					'Create role first and then update this user with role.'
-				)
-			)
-			return
-		}
-
-		await new UserRole({
-			userId: user.id,
-			roleId: role[0]['id'],
-		}).save()
-
-		console.log(chalk.blue('Default user created'))
-		return
-	} catch (error) {
-		console.log(chalk.red(error))
-	}
-}
-
 export {
 	getUsers,
 	getUser,
@@ -509,6 +460,5 @@ export {
 	updateUser,
 	deleteUser,
 	uploadProfile,
-	insertDefaultUser,
 	updateUserStatus,
 }
