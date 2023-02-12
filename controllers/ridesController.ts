@@ -93,7 +93,6 @@ const getRides = async (req: Request, res: Response) => {
 			.status(200)
 			.json({ message: 'All rides', data: { totaRides, rides } })
 	} catch (error) {
-		console.log(error)
 		res.status(500).json({ message: 'Some error occured' })
 	}
 }
@@ -121,7 +120,6 @@ const getRide = async (req: Request, res: Response) => {
 
 		res.status(200).json({ message: 'Ride not found' })
 	} catch (error) {
-		console.log(error)
 		res.status(500).json({ message: 'Some error occured' })
 	}
 }
@@ -179,7 +177,6 @@ const createRide = async (req: Request, res: Response) => {
 
 		res.status(201).json({ message: 'Ride booked successfully.' })
 	} catch (error) {
-		console.log(error)
 		res.status(500).json({ message: 'Some error occured' })
 	}
 }
@@ -201,7 +198,7 @@ const updateRide = async (req: Request, res: Response) => {
 		const { id: rideId } = req?.params
 
 		// get ride and set previous status
-		const existingRide = await r
+		let existingRide = await r
 			.table(Ride.getTableName())
 			.filter(r.row('id').eq(rideId))
 			.run()
@@ -211,6 +208,7 @@ const updateRide = async (req: Request, res: Response) => {
 			return
 		}
 
+		existingRide = existingRide[0]
 		if (existingRide.status.toLowerCase() === 'completed') {
 			res
 				.status(200)
@@ -232,6 +230,7 @@ const updateRide = async (req: Request, res: Response) => {
 			`${tripDate} ${tripTime}`,
 			'YYYY-MM-DD, HH:mm:ss'
 		).toDate()
+
 		await r
 			.table(Ride.getTableName())
 			.get(rideId)
