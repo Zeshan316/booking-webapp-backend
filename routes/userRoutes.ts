@@ -1,20 +1,63 @@
-import express, { IRouter, Router } from 'express'
+import express, { IRouter } from 'express'
 const userRouter: IRouter = express.Router()
+import { check, param, sanitize } from 'express-validator'
 
 import {
-	test,
 	getUsers,
 	getUser,
 	createUser,
 	updateUser,
 	deleteUser,
-} from '../controllers/userController'
+	updateUserStatus,
+} from '../controllers/usersController'
 
-userRouter.post('/test', test)
-userRouter.get('/', getUsers) // /users?order=ASC|DESC&from=0&to=100&field=value - get array of users matching query parameters
-userRouter.get('/:id', getUser) // get user details using user_id
-userRouter.post('/', createUser) //create new user
-userRouter.patch('/:id', updateUser) //updates user with id using request body fields
-userRouter.delete('/:id', deleteUser) // removes user
+userRouter.get('/', getUsers)
+userRouter.get('/:id', getUser)
+userRouter.post(
+	'/',
+	[
+		check('firstName')
+			.exists()
+			.notEmpty()
+			.isLength({ min: 2, max: 60 }),
+		check('lastName')
+			.exists()
+			.notEmpty()
+			.isLength({ min: 2, max: 60 }),
+		check('email')
+			.exists()
+			.notEmpty()
+			.isEmail()
+			.normalizeEmail()
+			.isLength({ max: 60 }),
+		check('password').exists().notEmpty().isLength({ max: 60 }),
+		check('roleId').exists().notEmpty(),
+	],
+	createUser
+)
+userRouter.put(
+	'/change-status/:id',
+	[param('id').exists().notEmpty()],
+	[sanitize('id').trim()],
+	updateUserStatus
+)
+// userRouter.post('/uploadAvtar/:id', uploadProfile)
+userRouter.patch(
+	'/:id',
+	[
+		param('id').exists().notEmpty(),
+		check('firstName').exists().notEmpty().isLength({ max: 60 }),
+		check('lastName').exists().notEmpty().isLength({ max: 60 }),
+	],
+	[sanitize('id').trim()],
+	updateUser
+)
+
+userRouter.delete(
+	'/:id',
+	[param('id').exists().notEmpty()],
+	[sanitize('id').trim()],
+	deleteUser
+)
 
 export default userRouter

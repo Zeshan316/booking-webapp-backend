@@ -5,6 +5,7 @@ interface userModelProps {
 	email: string
 	phoneNumber: string
 	profileImgUrl: string
+	role: string
 	createdAt: Date | any
 	updatedAt: Date | any
 }
@@ -17,7 +18,10 @@ interface userPasswordModelProps {
 	updatedAt: Date | any
 }
 
-interface AuthResponse {}
+interface Role {
+	name: string
+	level: number
+}
 
 declare namespace Express {
 	interface Request {
@@ -25,3 +29,5 @@ declare namespace Express {
 		userRole?: string
 	}
 }
+
+declare type GenericObject = { [key: string]: any }

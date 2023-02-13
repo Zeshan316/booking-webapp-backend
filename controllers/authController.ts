@@ -4,9 +4,6 @@ import jwt from 'jsonwebtoken'
 import thinky from '../config/db'
 import { User, Password, Role, UserRole } from '../models/All'
 import { validationResult } from 'express-validator'
-import uuid from 'uuid'
-import path from 'path'
-import fs from 'fs'
 
 const { r } = thinky
 
@@ -26,7 +23,7 @@ const login = async (req: Request, res: Response) => {
 
 		const user: userModelProps[] = await r
 			.table(User.getTableName())
-			.filter({ email })
+			.filter({ email, deletedAt: null })
 			.run()
 
 		const { email: userEmail = false, id: userId = null } =
@@ -41,9 +38,9 @@ const login = async (req: Request, res: Response) => {
 
 		const userPasswordData: userPasswordModelProps[] = await r
 			.table(Password.getTableName())
-			.filter(r.row('userId').eq(userId))
 			.eqJoin('userId', r.table(User.getTableName()))
 			.zip()
+			.filter(r.row('userId').eq(userId))
 			.run()
 
 		const { password: userPassword = false } =
@@ -58,20 +55,23 @@ const login = async (req: Request, res: Response) => {
 
 		if (!bcrypt.compareSync(password, userPassword)) {
 			res.status(400).json({
-				message: 'Email or password do not match',
+				message: 'Email or password is invalid',
 				data: [],
 			})
 			return
 		}
 
 		// Get user role
-		const userRole: string = await _getUserRole(userId as string)
+		const userRole: GenericObject = await _getUserRole(
+			userId as string
+		)
 
 		// Create a token
 		const payload = {
 			user: {
 				id: userId,
-				role: userRole,
+				role: userRole['name'],
+				roleId: userRole['id'],
 			},
 		}
 		const token = await jwt.sign(
@@ -82,13 +82,21 @@ const login = async (req: Request, res: Response) => {
 			}
 		)
 
-		res.status(200).json({ message: 'Token generated', data: token })
+		res.status(200).json({
+			message: 'User logged in successfully',
+			data: {
+				token,
+				user: { ...user[0], role: userRole },
+			},
+		})
 	} catch (error: any) {
 		res.status(500).json({ message: error.toString() })
 	}
 }
 
-const _getUserRole = async (userId: string): Promise<string> => {
+const _getUserRole = async (
+	userId: string
+): Promise<GenericObject> => {
 	const userRole = await r
 		.table(UserRole.getTableName())
 		.filter(r.row('userId').eq(userId))
@@ -98,7 +106,48 @@ const _getUserRole = async (userId: string): Promise<string> => {
 		.zip()
 		.run()
 
-	return userRole[0]['name'] as string
+	return {
+		id: userRole[0]['id'],
+		name: userRole[0]['name'] as string,
+	}
 }
 
-export { login }
+const getUser = async (req: Request, res: Response) => {
+	try {
+		const user: userModelProps[] = await r
+			.table(User.getTableName())
+			.filter({ id: req.userId, deletedAt: null })
+			.run()
+
+		const { email: userEmail = false, id: userId } = user[0] || {}
+
+		if (!userEmail) {
+			res
+				.status(400)
+				.json({ message: 'User does not exist', data: [] })
+			return
+		}
+
+		const userRole: GenericObject = await _getUserRole(
+			userId as string
+		)
+
+		// Fetching token from header
+		const bearerToken = req.headers?.authorization as string
+		const [, token] = bearerToken.split(' ')
+
+		res.status(200).json({
+			data: {
+				token: token,
+				user: {
+					...user[0],
+					role: userRole,
+				},
+			},
+		})
+	} catch (error: any) {
+		res.status(500).json({ message: error.toString() })
+	}
+}
+
+export { login, getUser }
