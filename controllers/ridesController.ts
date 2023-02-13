@@ -285,16 +285,23 @@ const updateRideStatus = async (req: Request, res: Response) => {
 
 		const { rideStatus } = req.body
 
-		const rideStatusStr = Boolean(rideStatus)
-			? 'completed'
-			: 'awaiting'
+		if (
+			!Object.values(rideStatuses).includes(
+				rideStatus.toLocaleLowerCase()
+			)
+		) {
+			res.status(400).json({
+				message: 'Status will not update',
+			})
+			return
+		}
 
 		// update user data
 		await r
 			.table(Ride.getTableName())
 			.get(rideId)
 			.update({
-				status: rideStatusStr,
+				status: rideStatus.toLowerCase(),
 			})
 			.run()
 
