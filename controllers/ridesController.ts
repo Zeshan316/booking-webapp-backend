@@ -23,11 +23,17 @@ const getRides = async (req: Request, res: Response) => {
 			status = '',
 		} = req?.query
 
+		const allowedRoles = [
+			'app administrator',
+			'system administrator',
+			'driver',
+		]
 		// check is there any check to filter on
-		const userIdFilter =
-			req.userRole?.toLocaleLowerCase() === 'driver'
-				? {}
-				: r.row('userId').eq(req.userId)
+		const userIdFilter = allowedRoles.includes(
+			req.userRole?.toLocaleLowerCase() as string
+		)
+			? {}
+			: r.row('userId').eq(req.userId)
 
 		const directionFilter = direction.length
 			? r.row('direction').match(`(?i)${direction}`)
