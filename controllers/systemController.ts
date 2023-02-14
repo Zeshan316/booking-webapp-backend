@@ -13,6 +13,7 @@ import {
 	INITIAL_SYSTEM_ROLES,
 	INITIAL_SYSTEM_LOCATIONS,
 } from '../common/constants'
+import { defaultProfileUrl } from '../common/constants'
 
 const { r } = thinky
 
@@ -47,6 +48,7 @@ const insertDefaultUser = async () => {
 				lastName: 'Dna',
 				email: 'admin@dna.com',
 				phoneNumber: '',
+				profileImgUrl: defaultProfileUrl,
 				isActive: 1,
 			}).save()
 
