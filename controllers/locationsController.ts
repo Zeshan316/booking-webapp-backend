@@ -19,15 +19,11 @@ const getLocations = async (req: Request, res: Response) => {
 		// check is there any check to filter on
 		let filterQuery = {}
 		if (direction)
-			filterQuery = r
-				.row('direction')
-				.match(`(?i)^${direction}$`)
-				.and(r.row('deletedAt').eq(null))
+			filterQuery = r.row('direction').match(`(?i)^${direction}$`)
+		// .and(r.row('deletedAt').eq(null))
 		if (locationName)
-			filterQuery = r
-				.row('locationName')
-				.match(`(?i)${locationName}`)
-				.and(r.row('deletedAt').eq(null))
+			filterQuery = r.row('locationName').match(`(?i)${locationName}`)
+		// .and(r.row('deletedAt').eq(null))
 
 		// Count total locations
 		const totalLocations = await r
@@ -44,6 +40,7 @@ const getLocations = async (req: Request, res: Response) => {
 			.table(Location.getTableName())
 			.orderBy(orderByField)
 			.filter(filterQuery)
+			.filter({ deletedAt: null })
 			.skip(Number(from))
 			.limit(Number(to))
 			.run()
@@ -54,6 +51,28 @@ const getLocations = async (req: Request, res: Response) => {
 		})
 	} catch (error) {
 		console.log(error)
+		res.status(500).json({ message: 'Some error occured' })
+	}
+}
+
+const getLocation = async (req: Request, res: Response) => {
+	try {
+		const { id: locationId } = req?.params
+
+		const location = await r
+			.table(Location.getTableName())
+			.filter(r.row('id').eq(locationId))
+			.run()
+
+		if (location.length) {
+			res
+				.status(200)
+				.json({ message: 'Location fetched', data: location[0] })
+			return
+		}
+
+		res.status(200).json({ message: 'Location not found' })
+	} catch (error) {
 		res.status(500).json({ message: 'Some error occured' })
 	}
 }
@@ -182,5 +201,6 @@ export {
 	createLocation,
 	updateLocation,
 	getLocations,
+	getLocation,
 	deleteLocation,
 }
