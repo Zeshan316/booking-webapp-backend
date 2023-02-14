@@ -13,55 +13,69 @@ import {
 	INITIAL_SYSTEM_ROLES,
 	INITIAL_SYSTEM_LOCATIONS,
 } from '../common/constants'
+import { defaultProfileUrl } from '../common/constants'
 
 const { r } = thinky
 
 const insertDefaultUser = async () => {
 	try {
+		await Role.on('ready', async () => await initiateSystemRoles())
+		await Role.on(
+			'ready',
+			async () => await initiateSystemLocations()
+		)
+
+		/* return
+
 		await initiateSystemRoles()
-		await initiateSystemLocations()
+		await initiateSystemLocations() */
 
-		const existingUser = await r
-			.table(User.getTableName())
-			.filter({ email: 'admin@dna.com' })
-			.run()
+		await Role.on('ready', async () => {
+			const existingUser = await r
+				.table(User.getTableName())
+				.filter({ email: 'admin@dna.com' })
+				.run()
 
-		if (existingUser.length) {
-			return
-		}
+			if (existingUser.length) {
+				return
+			}
 
-		const salt = bcrypt.genSaltSync()
-		const hashedPassword = bcrypt.hashSync('123456', salt)
+			const salt = bcrypt.genSaltSync()
+			const hashedPassword = bcrypt.hashSync('123456', salt)
 
-		const user = await new User({
-			firstName: 'Administrator',
-			lastName: 'Dna',
-			email: 'admin@dna.com',
-			phoneNumber: '',
-			isActive: 1,
-		}).save()
-		await new Password({
-			userId: user.id,
-			password: hashedPassword,
-		}).save()
+			const user = await new User({
+				firstName: 'Administrator',
+				lastName: 'Dna',
+				email: 'admin@dna.com',
+				phoneNumber: '',
+				profileImgUrl: defaultProfileUrl,
+				isActive: 1,
+			}).save()
 
-		const role = await Role.filter(r.row('level').eq(1)).run()
+			await new Password({
+				userId: user.id,
+				password: hashedPassword,
+			}).save()
 
-		if (!role) {
-			console.log(
-				chalk.blue(
-					'Create role first and then update this user with role.'
+			const role = await Role.filter(r.row('level').eq(1)).run()
+
+			if (!role) {
+				console.log(
+					chalk.blue(
+						'Create role first and then update this user with role.'
+					)
 				)
-			)
-			return
-		}
+				return
+			}
 
-		await new UserRole({
-			userId: user.id,
-			roleId: role[0]['id'],
-		}).save()
+			await new UserRole({
+				userId: user.id,
+				roleId: role[0]['id'],
+			}).save()
 
-		console.log(chalk.blue('Default user created'))
+			console.log(chalk.blue('Default user created'))
+		})
+
 		return
 	} catch (error) {
 		console.log(chalk.red(error))

@@ -9,10 +9,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 import sessionAuthentication from './middleware/session'
 import { logger } from './middleware/logging'
-import thinky from './config/db'
 import { insertDefaultUser } from './controllers/systemController'
-
-const { r } = thinky
 
 // Routes
 import authRoutes from './routes/authRoutes'
