@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express'
+import { User } from '../models/All'
+import thinky from '../config/db'
 import jwt from 'jsonwebtoken'
+
+const { r } = thinky
 
 const sessionAuthentication = async (
 	req: Request,
@@ -19,11 +23,27 @@ const sessionAuthentication = async (
 		jwt.verify(
 			token,
 			process.env.JWT_SECRET as string,
-			(err, decoded: any) => {
+			async (err, decoded: any) => {
 				if (err) {
 					console.log(err)
 					res.status(401).json({ message: err?.message })
 					res.end()
+					return
+				}
+
+				// fetch user status
+				const user = await r
+					.table(User.getTableName())
+					.filter(r.row('id').eq(decoded?.user?.id))
+					.run()
+
+				const reqMethods = ['patch', 'put', 'delete', 'post']
+				if (
+					user?.length &&
+					!user[0]['isActive'] &&
+					reqMethods.includes(req.method.toLocaleLowerCase())
+				) {
+					res.status(400).json({ message: 'Inactive user' })
 					return
 				}
 
