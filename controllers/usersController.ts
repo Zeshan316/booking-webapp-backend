@@ -158,6 +158,7 @@ const createUser = async (req: Request, res: Response) => {
 			email,
 			phoneNumber,
 			profileImgUrl: defaultProfileUrl,
+			isActive: 0,
 		}).save()
 
 		await new Password({

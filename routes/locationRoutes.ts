@@ -6,10 +6,12 @@ import {
 	createLocation,
 	updateLocation,
 	getLocations,
+	getLocation,
 	deleteLocation,
 } from '../controllers/locationsController'
 
 locationRouter.get('/', getLocations)
+locationRouter.get('/:id', getLocation)
 locationRouter.post(
 	'/',
 	[

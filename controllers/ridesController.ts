@@ -78,7 +78,7 @@ const getRides = async (req: Request, res: Response) => {
 
 		const rides = await r
 			.table(Ride.getTableName())
-			.orderBy(orderByField, {
+			.orderBy({
 				index: orderByField,
 			})
 			.eqJoin('userId', r.table(User.getTableName()))
