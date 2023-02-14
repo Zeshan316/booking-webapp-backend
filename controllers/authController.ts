@@ -31,7 +31,7 @@ const login = async (req: Request, res: Response) => {
 
 		if (!userEmail) {
 			res
-				.status(200)
+				.status(400)
 				.json({ message: 'Email or password is invalid', data: [] })
 			return
 		}
@@ -48,7 +48,7 @@ const login = async (req: Request, res: Response) => {
 
 		if (!userPassword) {
 			res
-				.status(200)
+				.status(400)
 				.json({ message: 'Email or password is invalid', data: [] })
 			return
 		}

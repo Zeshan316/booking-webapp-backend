@@ -27,6 +27,7 @@ const getRoles = async (req: Request, res: Response) => {
 		const totalRoles = await r
 			.table(Role.getTableName())
 			.filter(filterObject)
+			.filter({ deletedAt: null })
 			.count()
 			.run()
 
@@ -38,6 +39,7 @@ const getRoles = async (req: Request, res: Response) => {
 			.table(Role.getTableName())
 			.orderBy(orderByField)
 			.filter(filterObject)
+			.filter({ deletedAt: null })
 			.skip(Number(from))
 			.limit(Number(to))
 			.run()
