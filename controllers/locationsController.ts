@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import thinky from '../config/db'
 import { Location } from '../models/All'
 import { validationResult } from 'express-validator'
+import { rideDirections } from '../common/constants'
 
 const { r } = thinky
 
@@ -18,17 +19,16 @@ const getLocations = async (req: Request, res: Response) => {
 
 		// check is there any check to filter on
 		let filterQuery = {}
-		if (direction)
-			filterQuery = r.row('direction').match(`(?i)^${direction}$`)
-		// .and(r.row('deletedAt').eq(null))
+		if (direction) filterQuery = r.row('direction').eq(`${direction}`)
+
 		if (locationName)
 			filterQuery = r.row('locationName').match(`(?i)${locationName}`)
-		// .and(r.row('deletedAt').eq(null))
 
 		// Count total locations
 		const totalLocations = await r
 			.table(Location.getTableName())
 			.filter(filterQuery)
+			.filter({ deletedAt: null })
 			.count()
 			.run()
 
